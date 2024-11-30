@@ -65,12 +65,12 @@ resource "aws_lambda_function" "pedido_function" {
   memory_size   = 512
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaPedido.API::FIAP.TechChallenge.LambdaPedido.API.Function_Handler_Generated::Handler"
-  # Código armazenado no S3
-  s3_bucket = "code-lambdas-functions"
+  # Cï¿½digo armazenado no S3
+  s3_bucket = "code-lambdas-functions-pedido"
   s3_key    = "lambda_pedido_function.zip"
 }
 
-# Criação da Tabela DynamoDB
+# Criaï¿½ï¿½o da Tabela DynamoDB
 resource "aws_dynamodb_table" "pedido_table" {
   name         = "PedidoTable"
   billing_mode = "PAY_PER_REQUEST"
@@ -78,10 +78,10 @@ resource "aws_dynamodb_table" "pedido_table" {
 
   attribute {
     name = "id"
-    type = "S" # Tipo da chave: "S" para string, "N" para número, "B" para binário
+    type = "S" # Tipo da chave: "S" para string, "N" para nï¿½mero, "B" para binï¿½rio
   }
 
-  # Opcional: Definição de uma chave de classificação (range key)
+  # Opcional: Definiï¿½ï¿½o de uma chave de classificaï¿½ï¿½o (range key)
   #attribute {
   #  name = "id_guid"
   #  type = "S"
