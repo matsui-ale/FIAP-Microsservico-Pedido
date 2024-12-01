@@ -10,6 +10,11 @@ terraform {
   }
 }
 
+# Definir a fila SQS
+data "aws_sqs_queue" "solicita_pagamento" {
+  name = "sqs_solicita_pagamento"
+}
+
 resource "aws_iam_role" "lambda_execution_role" {
   name = "lambda_pedido_execution_role"
 
@@ -45,7 +50,8 @@ resource "aws_iam_policy" "lambda_policy" {
           "dynamodb:Query",
           "dynamodb:Scan",
           "dynamodb:UpdateItem",
-          "dynamodb:DescribeTable"
+          "dynamodb:DescribeTable",
+          "sqs:*"
         ]
         Resource = "*"
       }
@@ -65,12 +71,18 @@ resource "aws_lambda_function" "pedido_function" {
   memory_size   = 512
   timeout       = 30
   handler       = "FIAP.TechChallenge.LambdaPedido.API::FIAP.TechChallenge.LambdaPedido.API.Function_Handler_Generated::Handler"
-  # Cï¿½digo armazenado no S3
-  s3_bucket = "code-lambdas-functions-pedido"
+  # Código armazenado no S3
+  s3_bucket = "code-lambdas-functions"
   s3_key    = "lambda_pedido_function.zip"
+
+  environment {
+    variables = {
+      url_sqs_solicita_pagamento = data.aws_sqs_queue.solicita_pagamento.id
+    }
+  }
 }
 
-# Criaï¿½ï¿½o da Tabela DynamoDB
+# Criação da Tabela DynamoDB
 resource "aws_dynamodb_table" "pedido_table" {
   name         = "PedidoTable"
   billing_mode = "PAY_PER_REQUEST"
@@ -78,10 +90,10 @@ resource "aws_dynamodb_table" "pedido_table" {
 
   attribute {
     name = "id"
-    type = "S" # Tipo da chave: "S" para string, "N" para nï¿½mero, "B" para binï¿½rio
+    type = "S" # Tipo da chave: "S" para string, "N" para número, "B" para binário
   }
 
-  # Opcional: Definiï¿½ï¿½o de uma chave de classificaï¿½ï¿½o (range key)
+  # Opcional: Definição de uma chave de classificação (range key)
   #attribute {
   #  name = "id_guid"
   #  type = "S"
